@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1a1d23" />
+  <title>Torneo DLS — Resultados y calendario</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg-noise" aria-hidden="true"></div>
+  <div class="bg-pitch" aria-hidden="true"></div>
+
+  <div id="screen-app" class="screen screen--app">
+    <div class="page page--app">
+      <header class="app-top">
+        <div class="app-brand">
+          <span class="app-badge" aria-hidden="true">⚽</span>
+          <div class="app-brand-text">
+            <p class="app-kicker">Torneo DLS</p>
+            <h1 class="app-title" id="appTournamentTitle">Mi torneo</h1>
+          </div>
+        </div>
+        <nav class="app-nav" aria-label="Secciones">
+          <button type="button" class="app-nav-btn is-active" data-panel="resumen">Resumen</button>
+          <button type="button" class="app-nav-btn" data-panel="torneo">Gestionar</button>
+          <button type="button" class="app-nav-btn" data-panel="ajustes">Ajustes</button>
+        </nav>
+      </header>
+
+      <!-- Vista resumen (dashboard) -->
+      <div id="panel-resumen" class="panel panel--resumen">
+        <p class="dashboard-lead" id="dashLead">Todo el torneo en un vistazo.</p>
+        <div class="dashboard-grid">
+          <article class="dash-card dash-card--standings">
+            <div class="dash-card-head">
+              <span class="dash-card-icon" aria-hidden="true">📊</span>
+              <h2 class="dash-card-title">Tabla</h2>
+            </div>
+            <div class="dash-card-body" id="dashStandings"></div>
+          </article>
+          <article class="dash-card dash-card--upcoming">
+            <div class="dash-card-head">
+              <span class="dash-card-icon" aria-hidden="true">📅</span>
+              <h2 class="dash-card-title">Próximos partidos</h2>
+            </div>
+            <div class="dash-card-body" id="dashUpcoming"></div>
+          </article>
+          <article class="dash-card dash-card--results">
+            <div class="dash-card-head">
+              <span class="dash-card-icon" aria-hidden="true">🏆</span>
+              <h2 class="dash-card-title">Últimos resultados</h2>
+            </div>
+            <div class="dash-card-body" id="dashResults"></div>
+          </article>
+        </div>
+      </div>
+
+      <!-- Vista gestión (listas editables) -->
+      <div id="panel-torneo" class="panel panel--torneo hidden">
+        <section class="card card--upcoming">
+          <div class="card-head">
+            <h2 class="card-title"><span class="card-icon" aria-hidden="true">📅</span> Partidos de mañana</h2>
+            <button type="button" class="btn btn-primary" id="btnAddUpcoming">+ Partido</button>
+          </div>
+          <p class="hint">Solo se listan los partidos con la misma fecha que elegiste en Ajustes.</p>
+          <ul class="match-list match-list--365" id="listUpcoming"></ul>
+          <form class="inline-form hidden" id="formUpcoming">
+            <input type="text" name="home" placeholder="Local" required />
+            <span class="vs">vs</span>
+            <input type="text" name="away" placeholder="Visitante" required />
+            <input type="date" name="date" title="Día del partido" />
+            <input type="time" name="time" />
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="button" class="btn btn-ghost" id="cancelUpcoming">Cancelar</button>
+          </form>
+        </section>
+
+        <section class="card card--results">
+          <div class="card-head">
+            <h2 class="card-title"><span class="card-icon" aria-hidden="true">🏆</span> Resultados</h2>
+            <button type="button" class="btn btn-primary btn--gold" id="btnAddResult">+ Resultado</button>
+          </div>
+          <ul class="match-list match-list--365 match-list--results" id="listResults"></ul>
+          <form class="inline-form hidden" id="formResult">
+            <input type="text" name="home" placeholder="Local" required />
+            <span class="vs">vs</span>
+            <input type="text" name="away" placeholder="Visitante" required />
+            <input type="number" name="scoreHome" min="0" placeholder="Goles local" required />
+            <input type="number" name="scoreAway" min="0" placeholder="Goles visitante" required />
+            <input type="date" name="date" />
+            <input type="number" name="aggHome" min="0" placeholder="Global local (opc.)" title="Ida y vuelta / serie" />
+            <input type="number" name="aggAway" min="0" placeholder="Global visita (opc.)" />
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="button" class="btn btn-ghost" id="cancelResult">Cancelar</button>
+          </form>
+        </section>
+
+        <section class="card card--standings">
+          <div class="card-head">
+            <h2 class="card-title"><span class="card-icon" aria-hidden="true">📊</span> Tabla de posiciones</h2>
+          </div>
+          <p class="hint hint--tight">3 pts ganar, 1 empate. Desempate: diferencia de gol, luego a favor.</p>
+          <p class="standings-placeholder hidden" id="standingsEmpty">Todavía no hay equipos en la tabla. Agregá al menos un resultado.</p>
+          <div class="standings-scroll" id="standingsWrap">
+            <table class="standings-table hidden" id="standingsTable" aria-describedby="standings-caption">
+              <caption id="standings-caption" class="sr-only">Posiciones del torneo</caption>
+              <thead>
+                <tr>
+                  <th scope="col" class="standings-th-rank">#</th>
+                  <th scope="col">Equipo</th>
+                  <th scope="col" title="Partidos jugados">PJ</th>
+                  <th scope="col" title="Ganados">G</th>
+                  <th scope="col" title="Empates">E</th>
+                  <th scope="col" title="Perdidos">P</th>
+                  <th scope="col" title="Goles a favor">GF</th>
+                  <th scope="col" title="Goles en contra">GC</th>
+                  <th scope="col" title="Diferencia">DG</th>
+                  <th scope="col" class="standings-th-pts">Pts</th>
+                </tr>
+              </thead>
+              <tbody id="standingsBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- Ajustes -->
+      <div id="panel-ajustes" class="panel panel--ajustes hidden">
+        <section class="card card--settings">
+          <h2 class="card-title"><span class="card-icon" aria-hidden="true">⚙️</span> Torneo</h2>
+          <div class="grid two">
+            <label class="field">
+              <span>Nombre del torneo</span>
+              <input type="text" id="inputTournamentName" placeholder="Ej: Copa Amigos 2026" />
+            </label>
+            <label class="field">
+              <span>Fecha para “próximos partidos”</span>
+              <input type="date" id="inputTomorrow" />
+            </label>
+          </div>
+        </section>
+
+        <section class="card card--backup">
+          <h2 class="card-title"><span class="card-icon" aria-hidden="true">💾</span> Copia de seguridad</h2>
+          <p class="hint hint--tight">Exportá el JSON para otro PC o un backup.</p>
+          <div class="row-btns">
+            <button type="button" class="btn btn-ghost" id="btnExport">Exportar JSON</button>
+            <label class="btn btn-ghost file-btn">
+              Importar JSON
+              <input type="file" id="importFile" accept="application/json" hidden />
+            </label>
+          </div>
+        </section>
+
+        <section class="card card--cloud">
+          <h2 class="card-title"><span class="card-icon" aria-hidden="true">☁️</span> Nube (Supabase)</h2>
+          <p class="hint hint--tight" id="syncStatus">Comprobando conexión…</p>
+        </section>
+
+      </div>
+
+      <footer class="footer">
+        <p>Copia local en el navegador + sincronización con Supabase si configuraste <code>config.js</code>.</p>
+      </footer>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8/dist/umd/supabase.js"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
