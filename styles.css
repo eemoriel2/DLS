@@ -1027,6 +1027,177 @@ input:focus {
   margin-top: 1.15rem;
 }
 
+.card--codebook {
+  margin-top: 1.15rem;
+  border-left: 3px solid #34d399;
+}
+
+.field-optional {
+  font-weight: 400;
+  opacity: 0.75;
+  font-size: 0.88em;
+}
+
+.codebook-form {
+  margin-bottom: 1rem;
+}
+
+.codebook-form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .codebook-form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.codebook-form-actions {
+  margin-top: 0.85rem;
+}
+
+.codebook-table-wrap {
+  margin-top: 0.25rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Tabla propia: evita reglas de .standings-table (th centrado, td numéricos, flex en td) */
+.codebook-table {
+  width: 100%;
+  table-layout: fixed;
+  min-width: 560px;
+  font-size: 1rem;
+  border-collapse: collapse;
+}
+
+.codebook-col-name {
+  width: 24%;
+}
+
+.codebook-col-code {
+  width: 26%;
+}
+
+.codebook-col-comment {
+  width: 38%;
+}
+
+.codebook-col-actions {
+  width: 12%;
+}
+
+.codebook-table > thead > tr > th {
+  text-align: left !important;
+  vertical-align: bottom;
+  font-size: 0.78rem;
+  font-variant-numeric: normal;
+  padding: 0.65rem 0.5rem;
+  border-bottom: 1px solid var(--sb-line);
+}
+
+.codebook-table th.codebook-th-actions {
+  text-align: right !important;
+  white-space: nowrap;
+}
+
+.codebook-th-hint {
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0.75;
+  font-size: 0.72em;
+}
+
+.codebook-table > tbody > tr > td {
+  vertical-align: middle !important;
+  text-align: left !important;
+  font-variant-numeric: normal;
+  padding: 0.7rem 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: #e5e7eb;
+}
+
+.codebook-table tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.codebook-table td.codebook-name {
+  font-size: 1.03rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  line-height: 1.35;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+.codebook-code-td {
+  padding-top: 0.6rem !important;
+  padding-bottom: 0.6rem !important;
+}
+
+.codebook-code-cell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.45rem;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.codebook-table .codebook-code {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: ui-monospace, "Cascadia Code", "Consolas", monospace;
+  font-size: 1.12rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #ddd6fe;
+  cursor: copy;
+  line-height: 1.2;
+}
+
+.codebook-table .btn-copy--table {
+  width: 2.45rem;
+  height: 2.45rem;
+  flex-shrink: 0;
+}
+
+.codebook-table .btn-copy--table .btn-copy__icon {
+  width: 20px;
+  height: 20px;
+}
+
+.codebook-table td.codebook-comment {
+  color: #e2e8f0;
+  font-size: 1.02rem;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.codebook-table td.codebook-actions {
+  text-align: right !important;
+  vertical-align: middle !important;
+  white-space: nowrap;
+  width: 1%;
+}
+
+.codebook-actions .btn {
+  font-size: 0.92rem;
+  padding: 0.4rem 0.75rem;
+}
+
+.codebook-empty {
+  margin: 0.75rem 0 0;
+  text-align: center;
+}
+
+.codebook-copy-msg {
+  margin-top: 0.75rem;
+}
+
 .codegen-panel {
   display: flex;
   flex-wrap: wrap;

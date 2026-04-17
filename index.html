@@ -75,6 +75,47 @@
           </div>
           <p class="codegen-msg hidden" id="codegenCopyMsg" role="status">Copiado al portapapeles</p>
         </section>
+
+        <section class="card card--codebook">
+          <h2 class="card-title"><span class="card-icon" aria-hidden="true">📋</span> Registro de códigos</h2>
+          <p class="hint hint--tight">Guardá quién recibe cada código. El código se toma del recuadro violeta de arriba (generalo antes de guardar). Comentario opcional.</p>
+          <form id="formCodeBook" class="codebook-form">
+            <div class="codebook-form-grid">
+              <label class="field">
+                <span>Nombre o usuario</span>
+                <input type="text" id="inputCodeBookName" name="codeBookName" maxlength="120" placeholder="Ej: Juan, @nick…" autocomplete="name" required />
+              </label>
+              <label class="field">
+                <span>Comentario <span class="field-optional">(opcional)</span></span>
+                <input type="text" id="inputCodeBookComment" name="codeBookComment" maxlength="500" placeholder="Nota interna, grupo, etc." />
+              </label>
+            </div>
+            <div class="codebook-form-actions">
+              <button type="submit" class="btn btn-primary">Agregar a la tabla</button>
+            </div>
+          </form>
+          <div class="table-wrap codebook-table-wrap">
+            <table class="standings-table codebook-table" aria-label="Códigos asignados">
+              <colgroup>
+                <col class="codebook-col-name" />
+                <col class="codebook-col-code" />
+                <col class="codebook-col-comment" />
+                <col class="codebook-col-actions" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th scope="col">Nombre</th>
+                  <th scope="col">Código <span class="codebook-th-hint">(clic o copiar)</span></th>
+                  <th scope="col">Comentario</th>
+                  <th scope="col" class="codebook-th-actions">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="codeBookBody"></tbody>
+            </table>
+            <p class="empty codebook-empty" id="codeBookEmpty">Todavía no guardaste ningún código.</p>
+            <p class="codegen-msg codebook-copy-msg hidden" id="codeBookCopyMsg" role="status">Copiado al portapapeles</p>
+          </div>
+        </section>
       </div>
 
       <!-- Vista gestión (listas editables) -->

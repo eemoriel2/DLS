@@ -8,15 +8,31 @@
     tomorrow: "",
     upcoming: [],
     results: [],
+    codeBook: [],
   });
 
   function normalizeState(data) {
     if (!data || typeof data !== "object") return defaultState();
+    const codeBookRaw = Array.isArray(data.codeBook) ? data.codeBook : [];
+    const codeBook = codeBookRaw
+      .map((x) => {
+        if (!x || typeof x !== "object") return null;
+        const name = String(x.name || "").trim().slice(0, 120);
+        const code = String(x.code || "").trim().slice(0, 32);
+        const comment = String(x.comment ?? "").trim().slice(0, 500);
+        if (!name || !code) return null;
+        const id =
+          String(x.id || "").trim() ||
+          `cb-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+        return { id, name, code, comment };
+      })
+      .filter(Boolean);
     return {
       ...defaultState(),
       ...data,
       upcoming: Array.isArray(data.upcoming) ? data.upcoming : [],
       results: Array.isArray(data.results) ? data.results : [],
+      codeBook,
     };
   }
 
@@ -24,7 +40,8 @@
     return (
       !!(s.tournamentName && String(s.tournamentName).trim()) ||
       (Array.isArray(s.results) && s.results.length > 0) ||
-      (Array.isArray(s.upcoming) && s.upcoming.length > 0)
+      (Array.isArray(s.upcoming) && s.upcoming.length > 0) ||
+      (Array.isArray(s.codeBook) && s.codeBook.length > 0)
     );
   }
 
@@ -199,36 +216,48 @@
     if (out) out.textContent = code;
   }
 
-  async function copyCodegenToClipboard() {
-    const out = document.getElementById("generatedCode");
-    const text = out ? String(out.textContent || "").trim() : "";
-    if (!text || text === "—") return;
-    const msg = document.getElementById("codegenCopyMsg");
+  function showCopyFeedback(feedbackId) {
+    const id = feedbackId || "codegenCopyMsg";
+    const msg = document.getElementById(id);
+    if (!msg) return;
+    msg.textContent = "Copiado al portapapeles";
+    msg.classList.remove("hidden");
+    setTimeout(() => msg.classList.add("hidden"), 2200);
+  }
+
+  async function copyTextToClipboard(text, feedbackId) {
+    const t = String(text || "").trim();
+    if (!t) return;
+    const fid = feedbackId || "codegenCopyMsg";
     try {
-      await navigator.clipboard.writeText(text);
-      if (msg) {
-        msg.classList.remove("hidden");
-        setTimeout(() => msg.classList.add("hidden"), 2200);
-      }
+      await navigator.clipboard.writeText(t);
+      showCopyFeedback(fid);
     } catch {
       try {
         const ta = document.createElement("textarea");
-        ta.value = text;
+        ta.value = t;
         ta.style.position = "fixed";
         ta.style.left = "-9999px";
         document.body.appendChild(ta);
         ta.select();
         document.execCommand("copy");
         document.body.removeChild(ta);
-        if (msg) {
-          msg.classList.remove("hidden");
-          setTimeout(() => msg.classList.add("hidden"), 2200);
-        }
+        showCopyFeedback(fid);
       } catch {
-        alert(text);
+        alert(t);
       }
     }
   }
+
+  async function copyCodegenToClipboard() {
+    const out = document.getElementById("generatedCode");
+    const text = out ? String(out.textContent || "").trim() : "";
+    if (!text || text === "—") return;
+    await copyTextToClipboard(text);
+  }
+
+  const CODEBOOK_COPY_SVG =
+    '<svg class="btn-copy__icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
 
   const btnGenCode = document.getElementById("btnGenCode");
   const btnCopyCode = document.getElementById("btnCopyCode");
@@ -856,6 +885,72 @@
     renderResults();
     renderStandings();
     renderDashboard();
+    renderCodeBook();
+  }
+
+  function renderCodeBook() {
+    const tbody = document.getElementById("codeBookBody");
+    const empty = document.getElementById("codeBookEmpty");
+    if (!tbody) return;
+    const list = Array.isArray(state.codeBook) ? state.codeBook : [];
+    const rows = [...list].reverse();
+    tbody.innerHTML = "";
+    if (rows.length === 0) {
+      if (empty) empty.classList.remove("hidden");
+      return;
+    }
+    if (empty) empty.classList.add("hidden");
+    rows.forEach((row) => {
+      const tr = document.createElement("tr");
+      const tdName = document.createElement("td");
+      tdName.className = "codebook-name";
+      tdName.textContent = row.name;
+      const tdCode = document.createElement("td");
+      tdCode.className = "codebook-code-td";
+      const codeInner = document.createElement("div");
+      codeInner.className = "codebook-code-cell";
+      const codeSpan = document.createElement("span");
+      codeSpan.className = "codebook-code";
+      codeSpan.textContent = row.code;
+      codeSpan.title = "Clic para copiar";
+      codeSpan.addEventListener("click", () =>
+        copyTextToClipboard(row.code, "codeBookCopyMsg")
+      );
+      const copyBtn = document.createElement("button");
+      copyBtn.type = "button";
+      copyBtn.className = "btn-copy btn-copy--table";
+      copyBtn.setAttribute("title", "Copiar código");
+      copyBtn.setAttribute("aria-label", "Copiar código al portapapeles");
+      copyBtn.innerHTML = CODEBOOK_COPY_SVG;
+      copyBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        copyTextToClipboard(row.code, "codeBookCopyMsg");
+      });
+      codeInner.appendChild(codeSpan);
+      codeInner.appendChild(copyBtn);
+      tdCode.appendChild(codeInner);
+      const tdCom = document.createElement("td");
+      tdCom.className = "codebook-comment";
+      tdCom.textContent = row.comment || "—";
+      const tdDel = document.createElement("td");
+      tdDel.className = "codebook-actions";
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "btn btn-ghost codebook-del";
+      btn.textContent = "Eliminar";
+      btn.addEventListener("click", () => {
+        if (!confirm("¿Eliminar esta fila?")) return;
+        state.codeBook = list.filter((x) => x.id !== row.id);
+        save(state);
+        renderCodeBook();
+      });
+      tdDel.appendChild(btn);
+      tr.appendChild(tdName);
+      tr.appendChild(tdCode);
+      tr.appendChild(tdCom);
+      tr.appendChild(tdDel);
+      tbody.appendChild(tr);
+    });
   }
 
   if (el.inputTournamentName) {
@@ -1015,12 +1110,7 @@
       reader.onload = () => {
         try {
           const data = JSON.parse(String(reader.result));
-          state = {
-            ...defaultState(),
-            ...data,
-            upcoming: Array.isArray(data.upcoming) ? data.upcoming : [],
-            results: Array.isArray(data.results) ? data.results : [],
-          };
+          state = normalizeState(data);
           save(state);
           render();
           goToResumenIfApp();
@@ -1029,6 +1119,38 @@
         }
       };
       reader.readAsText(file);
+    });
+  }
+
+  const formCodeBook = document.getElementById("formCodeBook");
+  if (formCodeBook) {
+    formCodeBook.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const nameIn = document.getElementById("inputCodeBookName");
+      const codeOut = document.getElementById("generatedCode");
+      const comIn = document.getElementById("inputCodeBookComment");
+      const name = nameIn ? String(nameIn.value || "").trim() : "";
+      const code = codeOut ? String(codeOut.textContent || "").trim() : "";
+      const comment = comIn ? String(comIn.value || "").trim() : "";
+      if (!name) {
+        alert("Escribí un nombre o usuario.");
+        return;
+      }
+      if (!code || code === "—") {
+        alert('Generá un código arriba (botón «Generar código») antes de guardar.');
+        return;
+      }
+      if (!Array.isArray(state.codeBook)) state.codeBook = [];
+      state.codeBook.push({
+        id: uid(),
+        name: name.slice(0, 120),
+        code: code.slice(0, 32),
+        comment: comment.slice(0, 500),
+      });
+      save(state);
+      if (comIn) comIn.value = "";
+      if (nameIn) nameIn.value = "";
+      renderCodeBook();
     });
   }
 
