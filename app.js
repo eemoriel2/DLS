@@ -585,10 +585,7 @@
         tb.appendChild(tr);
       });
       table.appendChild(tb);
-      const wrap = document.createElement("div");
-      wrap.className = "dash-standings-scroll";
-      wrap.appendChild(table);
-      ds.appendChild(wrap);
+      ds.appendChild(table);
     }
 
     const date = state.tomorrow;

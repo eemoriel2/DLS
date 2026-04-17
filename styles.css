@@ -984,23 +984,6 @@ input:focus {
   line-height: 1.4;
 }
 
-.dash-standings-scroll {
-  max-height: min(52vh, 22rem);
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  margin: 0 -0.15rem;
-  padding: 0 0.15rem;
-}
-
-.dash-standings-scroll .dash-mini-table thead th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background: rgba(15, 23, 42, 0.92);
-  backdrop-filter: blur(6px);
-}
-
 .dash-mini-table {
   width: 100%;
   border-collapse: collapse;
