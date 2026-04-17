@@ -79,17 +79,15 @@
         <section class="card card--codebook">
           <h2 class="card-title"><span class="card-icon" aria-hidden="true">📋</span> Registro de códigos</h2>
           <p class="hint hint--tight">Guardá quién recibe cada código. El código se toma del recuadro violeta de arriba (generalo antes de guardar). Comentario opcional.</p>
-          <form id="formCodeBook" class="codebook-form">
-            <div class="codebook-form-grid">
-              <label class="field">
-                <span>Nombre o usuario</span>
-                <input type="text" id="inputCodeBookName" name="codeBookName" maxlength="120" placeholder="Ej: Juan, @nick…" autocomplete="name" required />
-              </label>
-              <label class="field">
-                <span>Comentario <span class="field-optional">(opcional)</span></span>
-                <input type="text" id="inputCodeBookComment" name="codeBookComment" maxlength="500" placeholder="Nota interna, grupo, etc." />
-              </label>
-            </div>
+          <form id="formCodeBook" class="codebook-form codebook-form--layout">
+            <label class="field codebook-field">
+              <span>Nombre o usuario</span>
+              <input type="text" id="inputCodeBookName" name="codeBookName" maxlength="120" placeholder="Ej: Juan, @nick…" autocomplete="name" required />
+            </label>
+            <label class="field codebook-field">
+              <span>Comentario <span class="field-optional">(opcional)</span></span>
+              <input type="text" id="inputCodeBookComment" name="codeBookComment" maxlength="500" placeholder="Nota interna, grupo, etc." />
+            </label>
             <div class="codebook-form-actions">
               <button type="submit" class="btn btn-primary">Agregar a la tabla</button>
             </div>
@@ -143,11 +141,23 @@
             <h2 class="card-title"><span class="card-icon" aria-hidden="true">🏆</span> Resultados</h2>
             <button type="button" class="btn btn-primary btn--gold" id="btnAddResult">+ Resultado</button>
           </div>
+          <p class="hint hint--tight">Marcador para victoria/empate. Si el rival <strong>no se presentó</strong>, usá <strong>3-0</strong> o <strong>0-3</strong> (o los botones) y dejá marcada la casilla: <strong>suma 3 pts al ganador pero no suma goles</strong> en la tabla (GF/GC/DG).</p>
           <ul class="match-list match-list--365 match-list--results" id="listResults"></ul>
           <form class="inline-form hidden" id="formResult">
             <input type="text" name="home" placeholder="Local" required />
             <span class="vs">vs</span>
             <input type="text" name="away" placeholder="Visitante" required />
+            <div class="walkover-tools">
+              <span class="walkover-tools__label">Rival no presentado (walkover)</span>
+              <div class="walkover-tools__btns">
+                <button type="button" class="btn btn-ghost" id="btnWalkoverHome" title="3-0 y opción «no suma goles» activada">Gana local 3-0</button>
+                <button type="button" class="btn btn-ghost" id="btnWalkoverAway" title="0-3 y opción «no suma goles» activada">Gana visita 0-3</button>
+              </div>
+            </div>
+            <label class="walkover-flag">
+              <input type="checkbox" name="walkover" id="inputWalkover" />
+              <span>No presentación del rival: cuenta la victoria y los <strong>3 puntos</strong>, pero <strong>no suma goles</strong> a favor ni en contra (ni en la diferencia).</span>
+            </label>
             <input type="number" name="scoreHome" min="0" placeholder="Goles local" required />
             <input type="number" name="scoreAway" min="0" placeholder="Goles visitante" required />
             <input type="date" name="date" />
@@ -162,7 +172,7 @@
           <div class="card-head">
             <h2 class="card-title"><span class="card-icon" aria-hidden="true">📊</span> Tabla de posiciones</h2>
           </div>
-          <p class="hint hint--tight">3 pts ganar, 1 empate. Desempate: diferencia de gol, luego a favor.</p>
+          <p class="hint hint--tight">3 pts ganar, 1 empate. Desempate: diferencia de gol, luego a favor. Walkover (casilla en Resultados): puntos sí, goles no.</p>
           <p class="standings-placeholder hidden" id="standingsEmpty">Todavía no hay equipos en la tabla. Agregá al menos un resultado.</p>
           <div class="standings-scroll" id="standingsWrap">
             <table class="standings-table hidden" id="standingsTable" aria-describedby="standings-caption">

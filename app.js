@@ -36,6 +36,20 @@
     };
   }
 
+  /** Evita perder filas locales si el JSON remoto aún no trae `codeBook` o va desfasado. */
+  function mergeCodeBookRows(remoteList, localList) {
+    const byId = new Map();
+    (Array.isArray(remoteList) ? remoteList : []).forEach((x) => {
+      const n = normalizeState({ codeBook: [x] }).codeBook[0];
+      if (n) byId.set(n.id, n);
+    });
+    (Array.isArray(localList) ? localList : []).forEach((x) => {
+      const n = normalizeState({ codeBook: [x] }).codeBook[0];
+      if (n && !byId.has(n.id)) byId.set(n.id, n);
+    });
+    return Array.from(byId.values());
+  }
+
   function meaningfulState(s) {
     return (
       !!(s.tournamentName && String(s.tournamentName).trim()) ||
@@ -135,7 +149,11 @@
         typeof remoteData === "object" &&
         meaningfulState(normalizeState(remoteData));
       if (hasRemote) {
-        state = normalizeState(remoteData);
+        const remoteNorm = normalizeState(remoteData);
+        state = {
+          ...remoteNorm,
+          codeBook: mergeCodeBookRows(remoteNorm.codeBook, state.codeBook),
+        };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         localStorage.setItem(META_KEY, row.updated_at);
       } else if (meaningfulState(state)) {
@@ -157,7 +175,10 @@
     const remoteState = normalizeState(row.data);
 
     if (new Date(remoteTs) > new Date(localTs)) {
-      state = remoteState;
+      state = {
+        ...remoteState,
+        codeBook: mergeCodeBookRows(remoteState.codeBook, state.codeBook),
+      };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       localStorage.setItem(META_KEY, remoteTs);
     } else if (new Date(localTs) > new Date(remoteTs)) {
@@ -404,10 +425,13 @@
 
       h.pj++;
       a.pj++;
-      h.gf += sh;
-      h.gc += sa;
-      a.gf += sa;
-      a.gc += sh;
+      const wo = Boolean(m.walkover);
+      const gh = wo ? 0 : sh;
+      const ga = wo ? 0 : sa;
+      h.gf += gh;
+      h.gc += ga;
+      a.gf += ga;
+      a.gc += gh;
 
       if (sh > sa) {
         h.pg++;
@@ -613,7 +637,8 @@
         wrap.className = "dash-mini-row dash-mini-row--result";
         const line = document.createElement("div");
         line.className = "dash-result-line";
-        line.textContent = `${m.home}  ${m.scoreHome} – ${m.scoreAway}  ${m.away}`;
+        const wo = m.walkover ? " WO" : "";
+        line.textContent = `${m.home}  ${m.scoreHome} – ${m.scoreAway}  ${m.away}${wo}`;
         wrap.appendChild(line);
         if (m.date) {
           const d = document.createElement("div");
@@ -808,6 +833,13 @@
       goals.appendChild(g1);
       goals.appendChild(sep);
       goals.appendChild(g2);
+      if (m.walkover) {
+        const wo = document.createElement("span");
+        wo.className = "sb-walkover-badge";
+        wo.setAttribute("title", "Victoria administrativa: cuenta puntos, no goles en diferencia");
+        wo.textContent = "WO";
+        goals.appendChild(wo);
+      }
 
       const sub = resultSubline(m);
       mid.appendChild(st);
@@ -873,6 +905,8 @@
     el.formResult.scoreHome.value = m.scoreHome;
     el.formResult.scoreAway.value = m.scoreAway;
     el.formResult.date.value = m.date || "";
+    const woIn = el.formResult.querySelector('input[name="walkover"]');
+    if (woIn) woIn.checked = Boolean(m.walkover);
     const aggH = el.formResult.querySelector('input[name="aggHome"]');
     const aggA = el.formResult.querySelector('input[name="aggAway"]');
     if (aggH) aggH.value = m.aggHome != null ? String(m.aggHome) : "";
@@ -1043,6 +1077,25 @@
   }
 
   if (el.formResult) {
+    function setWalkoverScores(goalsHome, goalsAway) {
+      const sh = el.formResult.querySelector('input[name="scoreHome"]');
+      const sa = el.formResult.querySelector('input[name="scoreAway"]');
+      const wo = el.formResult.querySelector('input[name="walkover"]');
+      if (sh && sa) {
+        sh.value = String(goalsHome);
+        sa.value = String(goalsAway);
+      }
+      if (wo) wo.checked = true;
+    }
+    const btnWalkoverHome = document.getElementById("btnWalkoverHome");
+    const btnWalkoverAway = document.getElementById("btnWalkoverAway");
+    if (btnWalkoverHome) {
+      btnWalkoverHome.addEventListener("click", () => setWalkoverScores(3, 0));
+    }
+    if (btnWalkoverAway) {
+      btnWalkoverAway.addEventListener("click", () => setWalkoverScores(0, 3));
+    }
+
     el.formResult.addEventListener("submit", (e) => {
       e.preventDefault();
       const fd = new FormData(el.formResult);
@@ -1051,13 +1104,15 @@
       const scoreHome = parseInt(fd.get("scoreHome"), 10);
       const scoreAway = parseInt(fd.get("scoreAway"), 10);
       const date = String(fd.get("date") || "").trim();
+      const walkover =
+        el.formResult.querySelector('input[name="walkover"]')?.checked === true;
       if (!home || !away || Number.isNaN(scoreHome) || Number.isNaN(scoreAway))
         return;
 
       const { aggHome, aggAway } = parseAgg(fd);
 
       function patchResult(base) {
-        const n = { ...base, home, away, scoreHome, scoreAway, date };
+        const n = { ...base, home, away, scoreHome, scoreAway, date, walkover };
         if (aggHome != null && aggAway != null) {
           n.aggHome = aggHome;
           n.aggAway = aggAway;

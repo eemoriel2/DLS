@@ -729,6 +729,74 @@ input:focus {
   border-color: rgba(251, 191, 36, 0.25);
 }
 
+.walkover-tools {
+  flex: 1 1 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+  padding: 0.55rem 0;
+  border-top: 1px dashed rgba(251, 191, 36, 0.2);
+  border-bottom: 1px dashed rgba(251, 191, 36, 0.2);
+  margin: 0.15rem 0;
+}
+
+.walkover-tools__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.walkover-tools__btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.walkover-tools__btns .btn {
+  font-size: 0.82rem;
+  padding: 0.4rem 0.65rem;
+}
+
+.walkover-flag {
+  flex: 1 1 100%;
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin: 0.15rem 0 0.35rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 10px;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.22);
+  cursor: pointer;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: #e2e8f0;
+}
+
+.walkover-flag input {
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+  accent-color: #fbbf24;
+}
+
+.sb-walkover-badge {
+  margin-left: 0.35rem;
+  padding: 0.12rem 0.35rem;
+  border-radius: 6px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #fde68a;
+  background: rgba(251, 191, 36, 0.2);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  vertical-align: middle;
+}
+
 .inline-form input[type="text"],
 .inline-form input[type="number"] {
   flex: 1 1 120px;
@@ -1042,20 +1110,47 @@ input:focus {
   margin-bottom: 1rem;
 }
 
-.codebook-form-grid {
+/* Grid en el propio form: 2 columnas desde ~480px; el botón ocupa todo el ancho debajo */
+.codebook-form--layout {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.75rem 1rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.85rem 1.1rem;
+  align-items: start;
 }
 
-@media (min-width: 640px) {
-  .codebook-form-grid {
-    grid-template-columns: 1fr 1fr;
+@media (min-width: 480px) {
+  .codebook-form--layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 }
 
+.codebook-form--layout .codebook-field {
+  min-width: 0;
+}
+
 .codebook-form-actions {
-  margin-top: 0.85rem;
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  margin-top: 0.15rem;
+}
+
+@media (min-width: 480px) {
+  .codebook-form-actions {
+    justify-content: flex-start;
+  }
+}
+
+.codebook-form-actions .btn {
+  width: 100%;
+  max-width: 22rem;
+}
+
+@media (min-width: 480px) {
+  .codebook-form-actions .btn {
+    width: auto;
+    min-width: 12rem;
+  }
 }
 
 .codebook-table-wrap {
