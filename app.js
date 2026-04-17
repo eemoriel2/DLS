@@ -183,6 +183,58 @@
     screenApp: document.getElementById("screen-app"),
   };
 
+  const CODEGEN_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789";
+
+  function generateRandomCode(len) {
+    let s = "";
+    for (let i = 0; i < len; i++) {
+      s += CODEGEN_CHARS[Math.floor(Math.random() * CODEGEN_CHARS.length)];
+    }
+    return s;
+  }
+
+  function runCodegen() {
+    const code = generateRandomCode(6);
+    const out = document.getElementById("generatedCode");
+    if (out) out.textContent = code;
+  }
+
+  async function copyCodegenToClipboard() {
+    const out = document.getElementById("generatedCode");
+    const text = out ? String(out.textContent || "").trim() : "";
+    if (!text || text === "—") return;
+    const msg = document.getElementById("codegenCopyMsg");
+    try {
+      await navigator.clipboard.writeText(text);
+      if (msg) {
+        msg.classList.remove("hidden");
+        setTimeout(() => msg.classList.add("hidden"), 2200);
+      }
+    } catch {
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        if (msg) {
+          msg.classList.remove("hidden");
+          setTimeout(() => msg.classList.add("hidden"), 2200);
+        }
+      } catch {
+        alert(text);
+      }
+    }
+  }
+
+  const btnGenCode = document.getElementById("btnGenCode");
+  const btnCopyCode = document.getElementById("btnCopyCode");
+  if (btnGenCode) btnGenCode.addEventListener("click", runCodegen);
+  if (btnCopyCode) btnCopyCode.addEventListener("click", copyCodegenToClipboard);
+
   function showPanel(name) {
     ["resumen", "torneo", "ajustes"].forEach((id) => {
       const p = document.getElementById(`panel-${id}`);
@@ -559,6 +611,7 @@
   }
 
   function renderUpcoming() {
+    if (!el.listUpcoming) return;
     const date = state.tomorrow;
     const filtered = date
       ? state.upcoming.filter((m) => m.date === date)
@@ -673,6 +726,7 @@
   }
 
   function renderResults() {
+    if (!el.listResults) return;
     const sorted = [...state.results].sort((a, b) => {
       const da = a.date || "";
       const db = b.date || "";
@@ -804,208 +858,179 @@
     renderDashboard();
   }
 
-  el.inputTournamentName.addEventListener("input", () => {
-    state.tournamentName = el.inputTournamentName.value;
-    save(state);
-    syncHeader();
-  });
+  if (el.inputTournamentName) {
+    el.inputTournamentName.addEventListener("input", () => {
+      state.tournamentName = el.inputTournamentName.value;
+      save(state);
+      syncHeader();
+    });
+  }
 
-  el.inputTomorrow.addEventListener("change", () => {
-    state.tomorrow = el.inputTomorrow.value;
-    save(state);
-    renderUpcoming();
-  });
+  if (el.inputTomorrow) {
+    el.inputTomorrow.addEventListener("change", () => {
+      state.tomorrow = el.inputTomorrow.value;
+      save(state);
+      renderUpcoming();
+    });
+  }
 
   function upcomingDateInput() {
-    return el.formUpcoming.querySelector('input[name="date"]');
+    return el.formUpcoming
+      ? el.formUpcoming.querySelector('input[name="date"]')
+      : null;
   }
 
-  el.btnAddUpcoming.addEventListener("click", () => {
-    editingUpcomingId = null;
-    el.formUpcoming.reset();
-    const di = upcomingDateInput();
-    if (di) di.value = state.tomorrow || "";
-    el.formUpcoming.classList.remove("hidden");
-  });
-
-  el.cancelUpcoming.addEventListener("click", () => {
-    el.formUpcoming.classList.add("hidden");
-    editingUpcomingId = null;
-  });
-
-  el.formUpcoming.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const fd = new FormData(el.formUpcoming);
-    const home = String(fd.get("home") || "").trim();
-    const away = String(fd.get("away") || "").trim();
-    const time = String(fd.get("time") || "").trim();
-    let date = String(fd.get("date") || "").trim();
-    if (!date) date = state.tomorrow || "";
-    if (!home || !away) return;
-
-    if (editingUpcomingId) {
-      state.upcoming = state.upcoming.map((x) =>
-        x.id === editingUpcomingId
-          ? { ...x, home, away, time, date: date || x.date }
-          : x
-      );
+  if (el.btnAddUpcoming && el.formUpcoming) {
+    el.btnAddUpcoming.addEventListener("click", () => {
       editingUpcomingId = null;
-    } else {
-      state.upcoming.push({
-        id: uid(),
-        home,
-        away,
-        time,
-        date,
-      });
-    }
-    save(state);
-    el.formUpcoming.classList.add("hidden");
-    el.formUpcoming.reset();
-    render();
-    goToResumenIfApp();
-  });
-
-  el.btnAddResult.addEventListener("click", () => {
-    editingResultId = null;
-    el.formResult.reset();
-    el.formResult.classList.remove("hidden");
-  });
-
-  el.cancelResult.addEventListener("click", () => {
-    el.formResult.classList.add("hidden");
-    editingResultId = null;
-  });
-
-  el.formResult.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const fd = new FormData(el.formResult);
-    const home = String(fd.get("home") || "").trim();
-    const away = String(fd.get("away") || "").trim();
-    const scoreHome = parseInt(fd.get("scoreHome"), 10);
-    const scoreAway = parseInt(fd.get("scoreAway"), 10);
-    const date = String(fd.get("date") || "").trim();
-    if (!home || !away || Number.isNaN(scoreHome) || Number.isNaN(scoreAway)) return;
-
-    const { aggHome, aggAway } = parseAgg(fd);
-
-    function patchResult(base) {
-      const n = { ...base, home, away, scoreHome, scoreAway, date };
-      if (aggHome != null && aggAway != null) {
-        n.aggHome = aggHome;
-        n.aggAway = aggAway;
-      } else {
-        delete n.aggHome;
-        delete n.aggAway;
-      }
-      return n;
-    }
-
-    if (editingResultId) {
-      state.results = state.results.map((x) =>
-        x.id === editingResultId ? patchResult(x) : x
-      );
-      editingResultId = null;
-    } else {
-      state.results.push(
-        patchResult({
-          id: uid(),
-        })
-      );
-    }
-    save(state);
-    el.formResult.classList.add("hidden");
-    el.formResult.reset();
-    render();
-    goToResumenIfApp();
-  });
-
-  el.btnExport.addEventListener("click", () => {
-    const blob = new Blob([JSON.stringify(state, null, 2)], {
-      type: "application/json",
+      el.formUpcoming.reset();
+      const di = upcomingDateInput();
+      if (di) di.value = state.tomorrow || "";
+      el.formUpcoming.classList.remove("hidden");
     });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "torneo-dls.json";
-    a.click();
-    URL.revokeObjectURL(a.href);
-  });
-
-  const CODEGEN_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789";
-
-  function generateRandomCode(len) {
-    let s = "";
-    for (let i = 0; i < len; i++) {
-      s += CODEGEN_CHARS[Math.floor(Math.random() * CODEGEN_CHARS.length)];
-    }
-    return s;
   }
 
-  function runCodegen() {
-    const code = generateRandomCode(6);
-    const out = document.getElementById("generatedCode");
-    if (out) out.textContent = code;
+  if (el.cancelUpcoming && el.formUpcoming) {
+    el.cancelUpcoming.addEventListener("click", () => {
+      el.formUpcoming.classList.add("hidden");
+      editingUpcomingId = null;
+    });
   }
 
-  async function copyCodegenToClipboard() {
-    const out = document.getElementById("generatedCode");
-    const text = out ? String(out.textContent || "").trim() : "";
-    if (!text || text === "—") return;
-    const msg = document.getElementById("codegenCopyMsg");
-    try {
-      await navigator.clipboard.writeText(text);
-      if (msg) {
-        msg.classList.remove("hidden");
-        setTimeout(() => msg.classList.add("hidden"), 2200);
+  if (el.formUpcoming) {
+    el.formUpcoming.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const fd = new FormData(el.formUpcoming);
+      const home = String(fd.get("home") || "").trim();
+      const away = String(fd.get("away") || "").trim();
+      const time = String(fd.get("time") || "").trim();
+      let date = String(fd.get("date") || "").trim();
+      if (!date) date = state.tomorrow || "";
+      if (!home || !away) return;
+
+      if (editingUpcomingId) {
+        state.upcoming = state.upcoming.map((x) =>
+          x.id === editingUpcomingId
+            ? { ...x, home, away, time, date: date || x.date }
+            : x
+        );
+        editingUpcomingId = null;
+      } else {
+        state.upcoming.push({
+          id: uid(),
+          home,
+          away,
+          time,
+          date,
+        });
       }
-    } catch {
-      try {
-        const ta = document.createElement("textarea");
-        ta.value = text;
-        ta.style.position = "fixed";
-        ta.style.left = "-9999px";
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        document.body.removeChild(ta);
-        if (msg) {
-          msg.classList.remove("hidden");
-          setTimeout(() => msg.classList.add("hidden"), 2200);
+      save(state);
+      el.formUpcoming.classList.add("hidden");
+      el.formUpcoming.reset();
+      render();
+      goToResumenIfApp();
+    });
+  }
+
+  if (el.btnAddResult && el.formResult) {
+    el.btnAddResult.addEventListener("click", () => {
+      editingResultId = null;
+      el.formResult.reset();
+      el.formResult.classList.remove("hidden");
+    });
+  }
+
+  if (el.cancelResult && el.formResult) {
+    el.cancelResult.addEventListener("click", () => {
+      el.formResult.classList.add("hidden");
+      editingResultId = null;
+    });
+  }
+
+  if (el.formResult) {
+    el.formResult.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const fd = new FormData(el.formResult);
+      const home = String(fd.get("home") || "").trim();
+      const away = String(fd.get("away") || "").trim();
+      const scoreHome = parseInt(fd.get("scoreHome"), 10);
+      const scoreAway = parseInt(fd.get("scoreAway"), 10);
+      const date = String(fd.get("date") || "").trim();
+      if (!home || !away || Number.isNaN(scoreHome) || Number.isNaN(scoreAway))
+        return;
+
+      const { aggHome, aggAway } = parseAgg(fd);
+
+      function patchResult(base) {
+        const n = { ...base, home, away, scoreHome, scoreAway, date };
+        if (aggHome != null && aggAway != null) {
+          n.aggHome = aggHome;
+          n.aggAway = aggAway;
+        } else {
+          delete n.aggHome;
+          delete n.aggAway;
         }
-      } catch {
-        alert(text);
+        return n;
       }
-    }
+
+      if (editingResultId) {
+        state.results = state.results.map((x) =>
+          x.id === editingResultId ? patchResult(x) : x
+        );
+        editingResultId = null;
+      } else {
+        state.results.push(
+          patchResult({
+            id: uid(),
+          })
+        );
+      }
+      save(state);
+      el.formResult.classList.add("hidden");
+      el.formResult.reset();
+      render();
+      goToResumenIfApp();
+    });
   }
 
-  const btnGenCode = document.getElementById("btnGenCode");
-  const btnCopyCode = document.getElementById("btnCopyCode");
-  if (btnGenCode) btnGenCode.addEventListener("click", runCodegen);
-  if (btnCopyCode) btnCopyCode.addEventListener("click", copyCodegenToClipboard);
+  if (el.btnExport) {
+    el.btnExport.addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], {
+        type: "application/json",
+      });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "torneo-dls.json";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+  }
 
-  el.importFile.addEventListener("change", () => {
-    const file = el.importFile.files && el.importFile.files[0];
-    el.importFile.value = "";
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const data = JSON.parse(String(reader.result));
-        state = {
-          ...defaultState(),
-          ...data,
-          upcoming: Array.isArray(data.upcoming) ? data.upcoming : [],
-          results: Array.isArray(data.results) ? data.results : [],
-        };
-        save(state);
-        render();
-        goToResumenIfApp();
-      } catch {
-        alert("El archivo no es un JSON válido.");
-      }
-    };
-    reader.readAsText(file);
-  });
+  if (el.importFile) {
+    el.importFile.addEventListener("change", () => {
+      const file = el.importFile.files && el.importFile.files[0];
+      el.importFile.value = "";
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(String(reader.result));
+          state = {
+            ...defaultState(),
+            ...data,
+            upcoming: Array.isArray(data.upcoming) ? data.upcoming : [],
+            results: Array.isArray(data.results) ? data.results : [],
+          };
+          save(state);
+          render();
+          goToResumenIfApp();
+        } catch {
+          alert("El archivo no es un JSON válido.");
+        }
+      };
+      reader.readAsText(file);
+    });
+  }
 
   function initTomorrowDefault() {
     if (!state.tomorrow) {

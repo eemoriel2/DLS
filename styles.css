@@ -1027,6 +1027,27 @@ input:focus {
   margin-top: 1.15rem;
 }
 
+.codegen-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.75rem;
+}
+
+.codegen-panel .codegen-result {
+  flex: 1 1 12rem;
+  min-width: 0;
+  margin: 0;
+}
+
+.btn--codegen-gen {
+  flex: 0 0 auto;
+  align-self: center;
+  min-height: 2.75rem;
+  padding-left: 1.15rem;
+  padding-right: 1.15rem;
+}
+
 .codegen-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -1055,8 +1076,8 @@ input:focus {
 .codegen-result {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  gap: 0.65rem;
+  flex-wrap: nowrap;
   padding: 0.75rem 1rem;
   border-radius: 12px;
   background: rgba(0, 0, 0, 0.35);
@@ -1067,12 +1088,15 @@ input:focus {
   flex: 1 1 auto;
   min-width: 0;
   margin: 0;
+  display: block;
   font-family: ui-monospace, "Cascadia Code", "Consolas", monospace;
   font-size: 1.35rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   color: #e0e7ff;
   word-break: break-all;
+  line-height: 1.25;
+  min-height: 1.5em;
 }
 
 .btn-copy {

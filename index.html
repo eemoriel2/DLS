@@ -61,17 +61,17 @@
         <section class="card card--codegen card--codegen--resumen">
           <h2 class="card-title"><span class="card-icon" aria-hidden="true">🔑</span> Código aleatorio</h2>
           <p class="hint hint--tight">Siempre <strong>6</strong> caracteres: letras <strong>a</strong>–<strong>z</strong> y números <strong>0</strong>–<strong>9</strong>.</p>
-          <div class="codegen-toolbar">
-            <button type="button" class="btn btn-primary" id="btnGenCode">Generar código</button>
-          </div>
-          <div class="codegen-result">
-            <output id="generatedCode" class="codegen-value" aria-live="polite">—</output>
-            <button type="button" class="btn-copy" id="btnCopyCode" title="Copiar" aria-label="Copiar código al portapapeles">
-              <svg class="btn-copy__icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-              </svg>
-            </button>
+          <div class="codegen-panel">
+            <div class="codegen-result">
+              <span id="generatedCode" class="codegen-value" aria-live="polite">—</span>
+              <button type="button" class="btn-copy" id="btnCopyCode" title="Copiar" aria-label="Copiar código al portapapeles">
+                <svg class="btn-copy__icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                </svg>
+              </button>
+            </div>
+            <button type="button" class="btn btn-primary btn--codegen-gen" id="btnGenCode">Generar código</button>
           </div>
           <p class="codegen-msg hidden" id="codegenCopyMsg" role="status">Copiado al portapapeles</p>
         </section>
