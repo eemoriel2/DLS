@@ -1019,6 +1019,98 @@ input:focus {
   border-left: 3px solid #38bdf8;
 }
 
+.card--codegen {
+  border-left: 3px solid #a78bfa;
+}
+
+.card--codegen--resumen {
+  margin-top: 1.15rem;
+}
+
+.codegen-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.field--inline {
+  flex: 1 1 200px;
+  margin: 0;
+}
+
+.codegen-select {
+  width: 100%;
+  max-width: 16rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(6, 13, 20, 0.65);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.codegen-result {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--sb-line);
+}
+
+.codegen-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font-family: ui-monospace, "Cascadia Code", "Consolas", monospace;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #e0e7ff;
+  word-break: break-all;
+}
+
+.btn-copy {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.btn-copy:hover {
+  background: rgba(167, 139, 250, 0.2);
+  color: #fff;
+  border-color: rgba(167, 139, 250, 0.45);
+}
+
+.btn-copy:active {
+  transform: scale(0.97);
+}
+
+.btn-copy__icon {
+  display: block;
+}
+
+.codegen-msg {
+  margin: 0.65rem 0 0;
+  font-size: 0.85rem;
+  color: #86efac;
+}
+
 #syncStatus.syncStatus--ok {
   color: #86efac;
   border-color: rgba(34, 197, 94, 0.25);

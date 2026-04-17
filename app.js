@@ -931,6 +931,58 @@
     URL.revokeObjectURL(a.href);
   });
 
+  const CODEGEN_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789";
+
+  function generateRandomCode(len) {
+    let s = "";
+    for (let i = 0; i < len; i++) {
+      s += CODEGEN_CHARS[Math.floor(Math.random() * CODEGEN_CHARS.length)];
+    }
+    return s;
+  }
+
+  function runCodegen() {
+    const code = generateRandomCode(6);
+    const out = document.getElementById("generatedCode");
+    if (out) out.textContent = code;
+  }
+
+  async function copyCodegenToClipboard() {
+    const out = document.getElementById("generatedCode");
+    const text = out ? String(out.textContent || "").trim() : "";
+    if (!text || text === "—") return;
+    const msg = document.getElementById("codegenCopyMsg");
+    try {
+      await navigator.clipboard.writeText(text);
+      if (msg) {
+        msg.classList.remove("hidden");
+        setTimeout(() => msg.classList.add("hidden"), 2200);
+      }
+    } catch {
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        if (msg) {
+          msg.classList.remove("hidden");
+          setTimeout(() => msg.classList.add("hidden"), 2200);
+        }
+      } catch {
+        alert(text);
+      }
+    }
+  }
+
+  const btnGenCode = document.getElementById("btnGenCode");
+  const btnCopyCode = document.getElementById("btnCopyCode");
+  if (btnGenCode) btnGenCode.addEventListener("click", runCodegen);
+  if (btnCopyCode) btnCopyCode.addEventListener("click", copyCodegenToClipboard);
+
   el.importFile.addEventListener("change", () => {
     const file = el.importFile.files && el.importFile.files[0];
     el.importFile.value = "";
