@@ -563,7 +563,7 @@
       thead.appendChild(hr);
       table.appendChild(thead);
       const tb = document.createElement("tbody");
-      st.slice(0, 8).forEach((r, i) => {
+      st.forEach((r, i) => {
         const tr = document.createElement("tr");
         if (i === 0) tr.classList.add("dash-lead-row");
         const tdN = document.createElement("td");
@@ -585,7 +585,10 @@
         tb.appendChild(tr);
       });
       table.appendChild(tb);
-      ds.appendChild(table);
+      const wrap = document.createElement("div");
+      wrap.className = "dash-standings-scroll";
+      wrap.appendChild(table);
+      ds.appendChild(wrap);
     }
 
     const date = state.tomorrow;
